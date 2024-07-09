@@ -1,0 +1,162 @@
+components:
+  schemas:
+    domain.Todo:
+      properties:
+        content:
+          type: string
+        created_at:
+          type: string
+        id:
+          type: string
+        title:
+          type: string
+        updated_at:
+          type: string
+      type: object
+    request.CreateTodoReq:
+      properties:
+        content:
+          example: sample content
+          type: string
+        title:
+          example: sample title
+          type: string
+      type: object
+    response.ErrorRes:
+      properties:
+        message:
+          type: string
+      type: object
+externalDocs:
+  description: ""
+  url: ""
+info:
+  title: ""
+  version: ""
+openapi: 3.1.0
+paths:
+  /api/todo/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/domain.Todo'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Not Found
+      summary: Todo 삭제
+      tags:
+      - Todo
+    get:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/domain.Todo'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Not Found
+      summary: Todo 조회
+      tags:
+      - Todo
+    patch:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.CreateTodoReq'
+        description: UpdateTodoReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/domain.Todo'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Not Found
+      summary: Todo 수정
+      tags:
+      - Todo
+  /api/todo/list:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/domain.Todo'
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Internal Server Error
+      summary: Todo 목록 조회
+      tags:
+      - Todo
+  /api/todo/new:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.CreateTodoReq'
+        description: CreateTodoReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/domain.Todo'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Internal Server Error
+      summary: Todo 생성
+      tags:
+      - Todo

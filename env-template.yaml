@@ -1,0 +1,15 @@
+host: 
+port: 
+
+develop: 
+
+log:
+  type: 
+  level: 
+
+database:
+  host: 
+  port: 
+  user: 
+  password: 
+  database: 
