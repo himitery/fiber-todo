@@ -45,6 +45,7 @@ func invokers() []interface{} {
 
 		// Router
 		router.NewSwaggerRouter,
+		router.NewHealthRouter,
 		router.NewtodoRouter,
 	}
 }
