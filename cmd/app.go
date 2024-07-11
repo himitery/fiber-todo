@@ -32,9 +32,12 @@ func providers() []interface{} {
 		database.NewDatabase,
 
 		// Service
+		application.NewAuthService,
+		application.NewJwtService,
 		application.NewTodoService,
 
 		// Repository
+		persistence.NewAuthPersistence,
 		persistence.NewTodoPersistence,
 	}
 }
@@ -46,6 +49,7 @@ func invokers() []interface{} {
 		// Router
 		router.NewSwaggerRouter,
 		router.NewHealthRouter,
+		router.NewAuthRouter,
 		router.NewtodoRouter,
 	}
 }

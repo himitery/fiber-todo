@@ -11,6 +11,47 @@ components:
       required:
       - title
       type: object
+    request.ReIssueReq:
+      properties:
+        refreshToken:
+          type: string
+      required:
+      - refreshToken
+      type: object
+    request.SignInReq:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    request.SignUpReq:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        username:
+          minLength: 2
+          type: string
+      required:
+      - email
+      - password
+      - username
+      type: object
+    request.UpdatePasswordReq:
+      properties:
+        alreadyPassword:
+          type: string
+        newPassword:
+          type: string
+      required:
+      - alreadyPassword
+      - newPassword
+      type: object
     response.ErrorRes:
       properties:
         message:
@@ -29,6 +70,13 @@ components:
         updatedAt:
           type: string
       type: object
+    response.TokenRes:
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      type: object
   securitySchemes:
     ApiKeyAuth:
       in: header
@@ -42,6 +90,108 @@ info:
   version: ""
 openapi: 3.1.0
 paths:
+  /api/auth:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.UpdatePasswordReq'
+        description: UpdatePasswordReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.TokenRes'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: 비밀번호 변경
+      tags:
+      - Auth
+  /api/auth/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.SignInReq'
+        description: SignInReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.TokenRes'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Internal Server Error
+      summary: 로그인
+      tags:
+      - Auth
+  /api/auth/new:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.SignUpReq'
+        description: SignUpReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.TokenRes'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Internal Server Error
+      summary: 회원가입
+      tags:
+      - Auth
+  /api/auth/renew:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request.ReIssueReq'
+        description: ReIssueReq
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.TokenRes'
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response.ErrorRes'
+          description: Internal Server Error
+      summary: 토큰 재발행
+      tags:
+      - Auth
   /api/health/:
     get:
       responses:

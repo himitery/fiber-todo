@@ -3,7 +3,7 @@ package request
 import "github.com/himitery/fiber-todo/internal/core/port"
 
 type CreateTodoReq struct {
-	Title   string `json:"title" example:"sample title"`
+	Title   string `json:"title" example:"sample title" validate:"required"`
 	Content string `json:"content" example:"sample content"`
 }
 
@@ -15,8 +15,8 @@ func (req CreateTodoReq) ToPortReq() port.CreateTodoReq {
 }
 
 type UpdateTodoReq struct {
-	Title   string `json:"title" example:"sample title"`
-	Content string `json:"content" example:"sample content"`
+	Title   string `json:"title" example:"sample title" validate:"required"`
+	Content string `json:"content" example:"sample content" validate:"required"`
 }
 
 func (req UpdateTodoReq) ToPortReq() port.UpdateTodoReq {

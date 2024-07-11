@@ -1,6 +1,9 @@
 package server
 
 import (
+	"fmt"
+
+	goValidator "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
@@ -50,6 +53,16 @@ func errorHandler(ctx fiber.Ctx, err error) error {
 	switch err := err.(type) {
 	case *port.PortError:
 		return ctx.Status(err.Code).JSON(response.ErrorRes{Message: err.Message})
+	case goValidator.ValidationErrors:
+		for _, it := range err {
+			switch it.Tag() {
+			case "required":
+				return ctx.Status(400).JSON(response.ErrorRes{Message: fmt.Sprintf("%s is required.", it.Field())})
+			case "password":
+				return ctx.Status(400).JSON(response.ErrorRes{Message: "비밀번호는 영어 대소문자 혹은 특수 문자로 시작하며, 각 최소 1개의 영어 대소문자, 특수 문자, 숫자를 포함해야 합니다. 또한 최소 8자리 이상을 만족해야합니다."})
+			}
+		}
+		return ctx.Status(400).JSON(response.ErrorRes{Message: err.Error()})
 	default:
 		return ctx.Status(500).JSON(response.ErrorRes{Message: err.Error()})
 	}

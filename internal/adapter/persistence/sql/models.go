@@ -8,6 +8,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Auth struct {
+	ID        pgtype.UUID
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
+	Email     string
+	Password  string
+	Username  string
+}
+
 type Todo struct {
 	ID        pgtype.UUID
 	CreatedAt pgtype.Timestamp

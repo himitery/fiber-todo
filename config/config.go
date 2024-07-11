@@ -20,6 +20,7 @@ type Config struct {
 	Cors     CorsConfig     `json:"cors"`
 	Log      LoggerConfig   `json:"log"`
 	Database DatabaseConfig `json:"database"`
+	Jwt      JwtConfig      `json:"jwt"`
 }
 
 type DatabaseConfig struct {
@@ -47,6 +48,11 @@ type LoggerConfig struct {
 	Level    string `json:"level"` // debug, info, error...
 	Type     string `json:"type"`  // options: file, stdout
 	Filename string `json:"filename"`
+}
+
+type JwtConfig struct {
+	AccessKey  string `json:"accessKey"`
+	RefreshKey string `json:"refreshKey"`
 }
 
 func LoadConfigFile(filename string) *Config {

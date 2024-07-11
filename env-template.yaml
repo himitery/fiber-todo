@@ -13,3 +13,8 @@ database:
   user: 
   password: 
   database: 
+
+jwt:
+  accessKey: 
+  refreshKey:
+  

@@ -1,3 +1,4 @@
-DROP EXTENSION "uuid-ossp";
-
+DROP TABLE IF EXISTS auth;
 DROP TABLE IF EXISTS todo;
+
+DROP EXTENSION IF EXISTS "uuid-ossp";
