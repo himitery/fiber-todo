@@ -21,6 +21,7 @@ type Todo struct {
 	ID        pgtype.UUID
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
+	AuthID    pgtype.UUID
 	Title     string
 	Content   string
 }

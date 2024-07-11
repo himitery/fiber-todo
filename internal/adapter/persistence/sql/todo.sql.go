@@ -13,25 +13,27 @@ import (
 
 const createTodo = `-- name: CreateTodo :one
 INSERT INTO todo (
-    title, content
+    auth_id, title, content
 ) VALUES (
-    $1, $2
+    $1, $2, $3
 )
-RETURNING id, created_at, updated_at, title, content
+RETURNING id, created_at, updated_at, auth_id, title, content
 `
 
 type CreateTodoParams struct {
+	AuthID  pgtype.UUID
 	Title   string
 	Content string
 }
 
 func (q *Queries) CreateTodo(ctx context.Context, arg CreateTodoParams) (Todo, error) {
-	row := q.db.QueryRow(ctx, createTodo, arg.Title, arg.Content)
+	row := q.db.QueryRow(ctx, createTodo, arg.AuthID, arg.Title, arg.Content)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthID,
 		&i.Title,
 		&i.Content,
 	)
@@ -41,7 +43,7 @@ func (q *Queries) CreateTodo(ctx context.Context, arg CreateTodoParams) (Todo, e
 const deleteOneTodo = `-- name: DeleteOneTodo :one
 DELETE FROM todo
 WHERE id = $1
-RETURNING id, created_at, updated_at, title, content
+RETURNING id, created_at, updated_at, auth_id, title, content
 `
 
 func (q *Queries) DeleteOneTodo(ctx context.Context, id pgtype.UUID) (Todo, error) {
@@ -51,14 +53,48 @@ func (q *Queries) DeleteOneTodo(ctx context.Context, id pgtype.UUID) (Todo, erro
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthID,
 		&i.Title,
 		&i.Content,
 	)
 	return i, err
 }
 
+const getTodoByAuthId = `-- name: GetTodoByAuthId :many
+SELECT id, created_at, updated_at, auth_id, title, content FROM todo
+WHERE auth_id = $1
+ORDER BY updated_at DESC
+`
+
+func (q *Queries) GetTodoByAuthId(ctx context.Context, authID pgtype.UUID) ([]Todo, error) {
+	rows, err := q.db.Query(ctx, getTodoByAuthId, authID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Todo
+	for rows.Next() {
+		var i Todo
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.AuthID,
+			&i.Title,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTodoById = `-- name: GetTodoById :one
-SELECT id, created_at, updated_at, title, content FROM todo
+SELECT id, created_at, updated_at, auth_id, title, content FROM todo
 WHERE id = $1
 LIMIT 1
 `
@@ -70,6 +106,7 @@ func (q *Queries) GetTodoById(ctx context.Context, id pgtype.UUID) (Todo, error)
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthID,
 		&i.Title,
 		&i.Content,
 	)
@@ -77,7 +114,7 @@ func (q *Queries) GetTodoById(ctx context.Context, id pgtype.UUID) (Todo, error)
 }
 
 const getTodoMany = `-- name: GetTodoMany :many
-SELECT id, created_at, updated_at, title, content FROM todo
+SELECT id, created_at, updated_at, auth_id, title, content FROM todo
 ORDER BY updated_at DESC
 `
 
@@ -94,6 +131,7 @@ func (q *Queries) GetTodoMany(ctx context.Context) ([]Todo, error) {
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AuthID,
 			&i.Title,
 			&i.Content,
 		); err != nil {
@@ -111,7 +149,7 @@ const updateTodo = `-- name: UpdateTodo :one
 UPDATE todo
 SET title = $2, content = $3
 WHERE id = $1
-RETURNING id, created_at, updated_at, title, content
+RETURNING id, created_at, updated_at, auth_id, title, content
 `
 
 type UpdateTodoParams struct {
@@ -127,6 +165,7 @@ func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, e
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AuthID,
 		&i.Title,
 		&i.Content,
 	)

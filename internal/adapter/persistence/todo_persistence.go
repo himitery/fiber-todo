@@ -29,6 +29,14 @@ func (repo TodoPersistence) Find() ([]domain.Todo, error) {
 	}), err
 }
 
+func (repo TodoPersistence) FindByAuthId(authId uuid.UUID) ([]domain.Todo, error) {
+	res, err := repo.database.Queries.GetTodoByAuthId(repo.database.Context, utils.UuidToPGUuid(authId))
+
+	return lo.Map(res, func(it sql.Todo, idx int) domain.Todo {
+		return repo.mapToDomain(it)
+	}), err
+}
+
 func (repo TodoPersistence) FindById(id uuid.UUID) (domain.Todo, error) {
 	res, err := repo.database.Queries.GetTodoById(repo.database.Context, utils.UuidToPGUuid(id))
 
@@ -37,6 +45,7 @@ func (repo TodoPersistence) FindById(id uuid.UUID) (domain.Todo, error) {
 
 func (repo TodoPersistence) Save(todo *domain.Todo) (domain.Todo, error) {
 	res, err := repo.database.Queries.CreateTodo(repo.database.Context, sql.CreateTodoParams{
+		AuthID:  utils.UuidToPGUuid(todo.AuthId),
 		Title:   todo.Title,
 		Content: todo.Content,
 	})
@@ -65,6 +74,7 @@ func (repo TodoPersistence) mapToDomain(todo sql.Todo) domain.Todo {
 		Id:        utils.PGUuidToUuid(todo.ID),
 		CreatedAt: todo.CreatedAt.Time,
 		UpdatedAt: todo.UpdatedAt.Time,
+		AuthId:    utils.PGUuidToUuid(todo.AuthID),
 		Title:     todo.Title,
 		Content:   todo.Content,
 	}

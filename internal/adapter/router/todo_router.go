@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
+	"github.com/himitery/fiber-todo/config"
 	server "github.com/himitery/fiber-todo/internal"
 	"github.com/himitery/fiber-todo/internal/adapter/router/request"
 	"github.com/himitery/fiber-todo/internal/adapter/router/response"
@@ -12,12 +13,14 @@ import (
 )
 
 type TodoRouter struct {
+	Conf        *config.Config
 	Router      fiber.Router
 	TodoUsecase port.TodoUsecase
 }
 
-func NewtodoRouter(httpServer *server.HttpServer, todoUsecase port.TodoUsecase) {
+func NewtodoRouter(conf *config.Config, httpServer *server.HttpServer, todoUsecase port.TodoUsecase) {
 	todoRouter := TodoRouter{
+		Conf:        conf,
 		Router:      httpServer.Server.Group("/api/todo"),
 		TodoUsecase: todoUsecase,
 	}
@@ -26,6 +29,8 @@ func NewtodoRouter(httpServer *server.HttpServer, todoUsecase port.TodoUsecase) 
 }
 
 func (router TodoRouter) Init() {
+	router.Router.Use(JwtHandler(router.Conf))
+
 	router.Router.Get("/list", router.getList)
 	router.Router.Get("/:id", router.getById)
 	router.Router.Post("/new", router.create)
@@ -39,8 +44,11 @@ func (router TodoRouter) Init() {
 // @Success		200		{object}	[]response.TodoRes
 // @Failure	    500		{object}	response.ErrorRes
 // @Router		/api/todo/list		[get]
+// @Security 	ApiKeyAuth
 func (router TodoRouter) getList(ctx fiber.Ctx) error {
-	res, err := router.TodoUsecase.GetList()
+	authId := ctx.Locals("auth").(string)
+
+	res, err := router.TodoUsecase.GetList(uuid.MustParse(authId))
 	if err != nil {
 		return err
 	}
@@ -57,8 +65,11 @@ func (router TodoRouter) getList(ctx fiber.Ctx) error {
 // @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[get]
+// @Security 	ApiKeyAuth
 func (router TodoRouter) getById(ctx fiber.Ctx) error {
-	res, err := router.TodoUsecase.GetOne(uuid.MustParse(ctx.Params("id")))
+	authId := ctx.Locals("auth").(string)
+
+	res, err := router.TodoUsecase.GetOne(uuid.MustParse(authId), uuid.MustParse(ctx.Params("id")))
 	if err != nil {
 		return err
 	}
@@ -74,13 +85,16 @@ func (router TodoRouter) getById(ctx fiber.Ctx) error {
 // @Success		200		{object}	response.TodoRes
 // @Failure	    500		{object} 	response.ErrorRes
 // @Router		/api/todo/new		[post]
+// @Security 	ApiKeyAuth
 func (router TodoRouter) create(ctx fiber.Ctx) error {
+	authId := ctx.Locals("auth").(string)
+
 	req := new(request.CreateTodoReq)
 	if err := ctx.Bind().Body(req); err != nil {
 		return err
 	}
 
-	res, err := router.TodoUsecase.Create(req.ToPortReq())
+	res, err := router.TodoUsecase.Create(uuid.MustParse(authId), req.ToPortReq())
 	if err != nil {
 		return err
 	}
@@ -97,13 +111,16 @@ func (router TodoRouter) create(ctx fiber.Ctx) error {
 // @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[patch]
+// @Security 	ApiKeyAuth
 func (router TodoRouter) update(ctx fiber.Ctx) error {
+	authId := ctx.Locals("auth").(string)
+
 	req := new(request.UpdateTodoReq)
 	if err := ctx.Bind().Body(req); err != nil {
 		return err
 	}
 
-	res, err := router.TodoUsecase.Update(uuid.MustParse(ctx.Params("id")), req.ToPortReq())
+	res, err := router.TodoUsecase.Update(uuid.MustParse(authId), uuid.MustParse(ctx.Params("id")), req.ToPortReq())
 	if err != nil {
 		return err
 	}
@@ -118,8 +135,11 @@ func (router TodoRouter) update(ctx fiber.Ctx) error {
 // @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[delete]
+// @Security 	ApiKeyAuth
 func (router TodoRouter) delete(ctx fiber.Ctx) error {
-	res, err := router.TodoUsecase.Delete(uuid.MustParse(ctx.Params("id")))
+	authId := ctx.Locals("auth").(string)
+
+	res, err := router.TodoUsecase.Delete(uuid.MustParse(authId), uuid.MustParse(ctx.Params("id")))
 	if err != nil {
 		return err
 	}

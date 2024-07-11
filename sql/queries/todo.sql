@@ -2,6 +2,11 @@
 SELECT * FROM todo
 ORDER BY updated_at DESC;
 
+-- name: GetTodoByAuthId :many
+SELECT * FROM todo
+WHERE auth_id = $1
+ORDER BY updated_at DESC;
+
 -- name: GetTodoById :one
 SELECT * FROM todo
 WHERE id = $1
@@ -9,9 +14,9 @@ LIMIT 1;
 
 -- name: CreateTodo :one
 INSERT INTO todo (
-    title, content
+    auth_id, title, content
 ) VALUES (
-    $1, $2
+    $1, $2, $3
 )
 RETURNING *;
 

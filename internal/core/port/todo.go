@@ -7,6 +7,7 @@ import (
 
 type TodoRepository interface {
 	Find() ([]domain.Todo, error)
+	FindByAuthId(authId uuid.UUID) ([]domain.Todo, error)
 	FindById(id uuid.UUID) (domain.Todo, error)
 	Save(todo *domain.Todo) (domain.Todo, error)
 	Update(todo *domain.Todo) (domain.Todo, error)
@@ -14,11 +15,11 @@ type TodoRepository interface {
 }
 
 type TodoUsecase interface {
-	GetList() ([]domain.Todo, error)
-	GetOne(id uuid.UUID) (domain.Todo, error)
-	Create(req CreateTodoReq) (domain.Todo, error)
-	Update(id uuid.UUID, req UpdateTodoReq) (domain.Todo, error)
-	Delete(id uuid.UUID) (domain.Todo, error)
+	GetList(authId uuid.UUID) ([]domain.Todo, error)
+	GetOne(authId uuid.UUID, id uuid.UUID) (domain.Todo, error)
+	Create(authId uuid.UUID, req CreateTodoReq) (domain.Todo, error)
+	Update(authId uuid.UUID, id uuid.UUID, req UpdateTodoReq) (domain.Todo, error)
+	Delete(authId uuid.UUID, id uuid.UUID) (domain.Todo, error)
 }
 
 type CreateTodoReq struct {
