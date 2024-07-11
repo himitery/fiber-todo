@@ -7,7 +7,7 @@ import (
 
 type TodoRepository interface {
 	Find() ([]domain.Todo, error)
-	FindOne(id uuid.UUID) (domain.Todo, error)
+	FindById(id uuid.UUID) (domain.Todo, error)
 	Save(todo *domain.Todo) (domain.Todo, error)
 	Update(todo *domain.Todo) (domain.Todo, error)
 	Delete(id uuid.UUID) (domain.Todo, error)

@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/himitery/fiber-todo/config"
+	"github.com/himitery/fiber-todo/config/validator"
 	"github.com/himitery/fiber-todo/internal/adapter/router/response"
 	"github.com/himitery/fiber-todo/internal/core/port"
 )
@@ -16,7 +17,8 @@ type HttpServer struct {
 
 func NewHttpServer(conf *config.Config) *HttpServer {
 	server := fiber.New(fiber.Config{
-		ErrorHandler: errorHandler,
+		ErrorHandler:    errorHandler,
+		StructValidator: validator.NewStructValidator(),
 	})
 
 	server.Use(cors.New(cors.Config{

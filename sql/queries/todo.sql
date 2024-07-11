@@ -2,7 +2,7 @@
 SELECT * FROM todo
 ORDER BY updated_at DESC;
 
--- name: GetTodoOne :one
+-- name: GetTodoById :one
 SELECT * FROM todo
 WHERE id = $1
 LIMIT 1;

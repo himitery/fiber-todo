@@ -5,7 +5,10 @@ import (
 	"github.com/google/uuid"
 	server "github.com/himitery/fiber-todo/internal"
 	"github.com/himitery/fiber-todo/internal/adapter/router/request"
+	"github.com/himitery/fiber-todo/internal/adapter/router/response"
+	"github.com/himitery/fiber-todo/internal/core/domain"
 	"github.com/himitery/fiber-todo/internal/core/port"
+	"github.com/samber/lo"
 )
 
 type TodoRouter struct {
@@ -23,42 +26,44 @@ func NewtodoRouter(httpServer *server.HttpServer, todoUsecase port.TodoUsecase) 
 }
 
 func (router TodoRouter) Init() {
-	router.Router.Get("/list", router.GetList)
-	router.Router.Get("/:id", router.GetById)
-	router.Router.Post("/new", router.Create)
-	router.Router.Patch("/:id", router.Update)
-	router.Router.Delete("/:id", router.Delete)
+	router.Router.Get("/list", router.getList)
+	router.Router.Get("/:id", router.getById)
+	router.Router.Post("/new", router.create)
+	router.Router.Patch("/:id", router.update)
+	router.Router.Delete("/:id", router.delete)
 }
 
 // @Tags        Todo
 // @Summary		Todo 목록 조회
 // @Produce		json
-// @Success		200		{object}	[]domain.Todo
+// @Success		200		{object}	[]response.TodoRes
 // @Failure	    500		{object}	response.ErrorRes
 // @Router		/api/todo/list		[get]
-func (router TodoRouter) GetList(ctx fiber.Ctx) error {
+func (router TodoRouter) getList(ctx fiber.Ctx) error {
 	res, err := router.TodoUsecase.GetList()
 	if err != nil {
 		return err
 	}
 
-	return ctx.JSON(res)
+	return ctx.Status(200).JSON(lo.Map(res, func(todo domain.Todo, _ int) response.TodoRes {
+		return *response.NewTodoRes(todo)
+	}))
 }
 
 // @Tags        Todo
 // @Summary		Todo 조회
 // @Produce		json
 // @Param       id		path		string				true	"id"
-// @Success		200		{object}	domain.Todo
+// @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[get]
-func (router TodoRouter) GetById(ctx fiber.Ctx) error {
+func (router TodoRouter) getById(ctx fiber.Ctx) error {
 	res, err := router.TodoUsecase.GetOne(uuid.MustParse(ctx.Params("id")))
 	if err != nil {
 		return err
 	}
 
-	return ctx.JSON(res)
+	return ctx.Status(200).JSON(response.NewTodoRes(res))
 }
 
 // @Tags        Todo
@@ -66,10 +71,10 @@ func (router TodoRouter) GetById(ctx fiber.Ctx) error {
 // @Accept		json
 // @Produce		json
 // @Param		request body 		request.CreateTodoReq	true	"CreateTodoReq"
-// @Success		200		{object}	domain.Todo
+// @Success		200		{object}	response.TodoRes
 // @Failure	    500		{object} 	response.ErrorRes
 // @Router		/api/todo/new		[post]
-func (router TodoRouter) Create(ctx fiber.Ctx) error {
+func (router TodoRouter) create(ctx fiber.Ctx) error {
 	req := new(request.CreateTodoReq)
 	if err := ctx.Bind().Body(req); err != nil {
 		return err
@@ -80,7 +85,7 @@ func (router TodoRouter) Create(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return ctx.JSON(res)
+	return ctx.Status(200).JSON(response.NewTodoRes(res))
 }
 
 // @Tags        Todo
@@ -89,10 +94,10 @@ func (router TodoRouter) Create(ctx fiber.Ctx) error {
 // @Produce		json
 // @Param       id		path		string					true	"id"
 // @Param		request body 		request.CreateTodoReq	true	"UpdateTodoReq"
-// @Success		200		{object}	domain.Todo
+// @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[patch]
-func (router TodoRouter) Update(ctx fiber.Ctx) error {
+func (router TodoRouter) update(ctx fiber.Ctx) error {
 	req := new(request.UpdateTodoReq)
 	if err := ctx.Bind().Body(req); err != nil {
 		return err
@@ -103,21 +108,21 @@ func (router TodoRouter) Update(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return ctx.JSON(res)
+	return ctx.Status(200).JSON(response.NewTodoRes(res))
 }
 
 // @Tags        Todo
 // @Summary		Todo 삭제
 // @Produce		json
 // @Param       id		path		string				true	"id"
-// @Success		200		{object}	domain.Todo
+// @Success		200		{object}	response.TodoRes
 // @Failure	    404		{object} 	response.ErrorRes
 // @Router		/api/todo/{id}		[delete]
-func (router TodoRouter) Delete(ctx fiber.Ctx) error {
+func (router TodoRouter) delete(ctx fiber.Ctx) error {
 	res, err := router.TodoUsecase.Delete(uuid.MustParse(ctx.Params("id")))
 	if err != nil {
 		return err
 	}
 
-	return ctx.JSON(res)
+	return ctx.Status(200).JSON(response.NewTodoRes(res))
 }

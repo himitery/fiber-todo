@@ -26,7 +26,7 @@ func (service TodoService) GetList() ([]domain.Todo, error) {
 }
 
 func (service TodoService) GetOne(id uuid.UUID) (domain.Todo, error) {
-	todo, err := service.todoRepository.FindOne(id)
+	todo, err := service.todoRepository.FindById(id)
 	if err != nil {
 		return domain.Todo{}, &port.PortError{Code: 404, Message: "아이템을 찾을 수 없습니다."}
 	}

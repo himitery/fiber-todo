@@ -57,6 +57,25 @@ func (q *Queries) DeleteOneTodo(ctx context.Context, id pgtype.UUID) (Todo, erro
 	return i, err
 }
 
+const getTodoById = `-- name: GetTodoById :one
+SELECT id, created_at, updated_at, title, content FROM todo
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetTodoById(ctx context.Context, id pgtype.UUID) (Todo, error) {
+	row := q.db.QueryRow(ctx, getTodoById, id)
+	var i Todo
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Content,
+	)
+	return i, err
+}
+
 const getTodoMany = `-- name: GetTodoMany :many
 SELECT id, created_at, updated_at, title, content FROM todo
 ORDER BY updated_at DESC
@@ -86,25 +105,6 @@ func (q *Queries) GetTodoMany(ctx context.Context) ([]Todo, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const getTodoOne = `-- name: GetTodoOne :one
-SELECT id, created_at, updated_at, title, content FROM todo
-WHERE id = $1
-LIMIT 1
-`
-
-func (q *Queries) GetTodoOne(ctx context.Context, id pgtype.UUID) (Todo, error) {
-	row := q.db.QueryRow(ctx, getTodoOne, id)
-	var i Todo
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Title,
-		&i.Content,
-	)
-	return i, err
 }
 
 const updateTodo = `-- name: UpdateTodo :one

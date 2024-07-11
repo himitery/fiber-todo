@@ -18,9 +18,14 @@ func NewHealthRouter(httpServer *server.HttpServer) {
 }
 
 func (router HealthRouter) Init() {
-	router.Router.Get("/", router.Ping)
+	router.Router.Get("/", router.ping)
 }
 
-func (router HealthRouter) Ping(ctx fiber.Ctx) error {
+// @Tags        Health
+// @Summary		Ping
+// @Produce		plain
+// @Success		200		{object}	string
+// @Router		/api/health/		[get]
+func (router HealthRouter) ping(ctx fiber.Ctx) error {
 	return ctx.Status(200).SendString("ok")
 }

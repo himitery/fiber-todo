@@ -29,8 +29,8 @@ func (repo TodoPersistence) Find() ([]domain.Todo, error) {
 	}), err
 }
 
-func (repo TodoPersistence) FindOne(id uuid.UUID) (domain.Todo, error) {
-	res, err := repo.database.Queries.GetTodoOne(repo.database.Context, utils.UuidToPGUuid(id))
+func (repo TodoPersistence) FindById(id uuid.UUID) (domain.Todo, error) {
+	res, err := repo.database.Queries.GetTodoById(repo.database.Context, utils.UuidToPGUuid(id))
 
 	return repo.mapToDomain(res), err
 }
